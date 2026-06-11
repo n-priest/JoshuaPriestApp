@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { sendSMS } from "@/lib/sms";
+import { sendReminder } from "@/lib/email";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -24,9 +24,12 @@ export async function GET(req: Request) {
   let sent = 0;
   for (const task of tasks) {
     const due = task.due_date
-      ? ` (due ${new Date(task.due_date).toLocaleDateString()})`
+      ? ` — due ${new Date(task.due_date).toLocaleDateString()}`
       : "";
-    await sendSMS(`Hey Joshua — reminder: ${task.title}${due}`);
+    await sendReminder(
+      `Reminder: ${task.title}`,
+      `Hey Joshua — reminder: ${task.title}${due}`
+    );
     await supabase
       .from("tasks")
       .update({ reminder_sent: true })
